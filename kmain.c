@@ -6,9 +6,11 @@ int kmain()
 {
 	char message[] = "Sleep rokshh";
 
+  fb_clear();
 	fb_move_cursor(6*80);
 	/* fb_write_simple(); */
-	fb_write_str(message, sizeof(message));
+	fb_write_str(message);
+  serial_write_str(message);
 	return 0;
 }
 

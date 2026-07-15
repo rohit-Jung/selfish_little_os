@@ -17,5 +17,5 @@
 void fb_move_cursor(unsigned short pos);
 void fb_write_cell(unsigned int i, char c, unsigned char fg, unsigned char bg);
 void fb_write_simple();
-int  fb_write_str(char *buf, unsigned int len);
+int  fb_write_str(char *buf);
 void fb_clear();
