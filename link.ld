@@ -6,6 +6,7 @@ SECTIONS {
 	.text ALIGN (0x1000) :  /* align at 4KB */
 	{
 		*(.text)        /* all the text sections from file */
+		*(.text.*)      
 	}
 
 	.rodata ALIGN (0x1000) :  /* align at 4KB */
