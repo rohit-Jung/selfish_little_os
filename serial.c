@@ -44,7 +44,11 @@ int serial_is_transmit_fifo_empty(unsigned short com) {
 }
 
 /* serial_write_str
+ * Writes a null-terminated string to COM1, one character at a time,
+ * busy-waiting until the transmit FIFO is ready for each byte.
  *
+ * @param buf  The null-terminated string to transmit
+ * @return     The number of characters transmitted
  */
 int serial_write_str(char *buf) {
   serial_configure_baud_rate(SERIAL_COM1_BASE, 3);
@@ -53,8 +57,9 @@ int serial_write_str(char *buf) {
   unsigned int i = 0;
   while (buf[i] != '\0') {
     while (!serial_is_transmit_fifo_empty(SERIAL_COM1_BASE)) {
-      outb(SERIAL_DATA_PORT(SERIAL_COM1_BASE), buf[i]);
+      /* busy-wait: spin until FIFO has room */
     }
+    outb(SERIAL_DATA_PORT(SERIAL_COM1_BASE), buf[i]);
     i++;
   }
 
