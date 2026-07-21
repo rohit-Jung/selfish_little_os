@@ -1,5 +1,6 @@
 OBJECTS = loader.o kmain.o framebuffer.o io.o serial.o \
-					interrupt.o keyboard.o pic.o idt.o interrupt_handler.o
+					interrupt.o keyboard.o pic.o idt.o interrupt_handler.o \
+					gdt.o memory_segments.o
 CC = gcc 
 CFLAGS = -m32 -nostdlib -nostdinc -fno-builtin -fno-stack-protector \
 				 -nostartfiles -nodefaultlibs -Wall -Wextra -Werror -c
