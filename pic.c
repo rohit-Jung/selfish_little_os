@@ -46,5 +46,5 @@ void pic_remap(int offset1, int offset2)
   outb(PIC_1_DATA, 0xFD); // 1111 1101 enable IRQ 1 only (keyboard)
   outb(PIC_2_DATA, 0xFF);
 
-  __asm__ __volatile__("sti"); /* enable interrupts */
+  // __asm__ __volatile__("sti"); /* enable interrupts */
 }
