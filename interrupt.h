@@ -25,16 +25,17 @@ void interrupt_handler_33();
 void interrupt_handler_14();
 
 /** using the c code get state of register, stack and number of interrupts **/
+/* field order must match the layout `pusha` leaves on the stack,
+ * lowest address first */
 struct cpu_state {
-	unsigned int eax;
-	unsigned int ebx;
-	unsigned int ecx;
-	unsigned int edx;
-	unsigned int ebp;
-	unsigned int esi;
 	unsigned int edi;
-
+	unsigned int esi;
+	unsigned int ebp;
 	unsigned int esp;
+	unsigned int ebx;
+	unsigned int edx;
+	unsigned int ecx;
+	unsigned int eax;
 } __attribute__((packed));
 
 struct stack_state {

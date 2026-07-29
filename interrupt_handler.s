@@ -27,29 +27,23 @@ interrupt_handler_%1:
 	; common interrupt handler
 
 common_interrupt_handler:
-	;    save the registers
-	push eax
-	push ebx
-	push ecx
-	push edx
-	push ebp
-	push esi
-	push edi
+	;    save the registers (pusha order matches struct cpu_state)
+	pusha
 
 	; Build arguments on the stack (cdecl: right-to-left)
 	; At this point
-	; esp+4  = eax (start of cpu_state)
-	; esp+28 = edi (end of cpu_state)
+	; esp+0  = edi (start of cpu_state)
+	; esp+28 = eax (end of cpu_state)
 	; esp+32 = interrupt number
-	; esp+36 = error code
+	; esp+36 = error code (start of stack_state)
 	; esp+40 = eip
 	; esp+44 = cs
 	; esp+48 = eflags
 
 	push dword [esp + 32]; interrupt number
-	lea  eax, [esp + 40]; pointer to the stack_state (error Code)
+	lea  eax, [esp + 40]; pointer to the stack_state (error code)
 	push eax
-	lea  eax, [esp + 12]; pointer to cpu_state (saved eax)
+	lea  eax, [esp + 8]; pointer to cpu_state (saved edi)
 	push eax
 
 	;    call the c function
@@ -59,15 +53,9 @@ common_interrupt_handler:
 	add esp, 12
 
 	;   restore the registers
-	pop edi
-	pop esi
-	pop ebp
-	pop edx
-	pop ecx
-	pop ebx
-	pop eax
+	popa
 
-	;   restore the esp
+	;   drop interrupt number and error code
 	add esp, 8
 
 	; return to the code that got interrupted
