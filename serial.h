@@ -15,6 +15,8 @@
 #define SERIAL_MODEM_COMMAND_PORT(base)    (base + 4)
 #define SERIAL_LINE_STATUS_PORT(base)      (base + 5)
 
+#define SERIAL_INTERRUPT_ENABLE_PORT(com)       (com + 1)
+
 /* The I/O port commands */
 
 /* SERIAL_LINE_ENABLE_DLAB:
@@ -23,9 +25,11 @@
  */
 #define SERIAL_LINE_ENABLE_DLAB 	0x80
 
+void serial_init(void);
 void serial_configure_baud_rate(unsigned short com, unsigned short divisor);
 void serial_configure_line(unsigned short com);
 int serial_is_transmit_fifo_empty(unsigned short com);
 int serial_write_str(char *buf);
+void serial_write_hex(unsigned int value);
 
 #endif

@@ -1,6 +1,17 @@
 #include "serial.h"
 #include "io.h"
 
+
+void serial_init(void) {
+  serial_configure_baud_rate(SERIAL_COM1_BASE, 3);
+  serial_configure_line(SERIAL_COM1_BASE);
+
+  /* enable FIFO, clear both queues, 14-byte trigger level */
+  outb(SERIAL_FIFO_COMMAND_PORT(SERIAL_COM1_BASE), 0xC7);
+  /* RTS + DTR set, OUT2 enabled (required for IRQs on real hardware) */
+  outb(SERIAL_MODEM_COMMAND_PORT(SERIAL_COM1_BASE), 0x0B);
+}
+
 /* serial_configure_baud_rate:
  * Sets the speed of the data being sent. The default speed of a serial
  * port is 115200 bits/s. The argument is a divisor of that number, hence
@@ -11,8 +22,9 @@
  */
 void serial_configure_baud_rate(unsigned short com, unsigned short divisor) {
   outb(SERIAL_LINE_COMMAND_PORT(com), SERIAL_LINE_ENABLE_DLAB);
-  outb(SERIAL_DATA_PORT(com), (divisor >> 8) & 0x00FF);
-  outb(SERIAL_DATA_PORT(com), divisor & 0x00FF);
+
+  outb(SERIAL_DATA_PORT(com), divisor & 0xFF); // DLL
+  outb(SERIAL_INTERRUPT_ENABLE_PORT(com), divisor >> 8); // DLM
 }
 
 /* serial_configure_line
@@ -51,9 +63,6 @@ int serial_is_transmit_fifo_empty(unsigned short com) {
  * @return     The number of characters transmitted
  */
 int serial_write_str(char *buf) {
-  serial_configure_baud_rate(SERIAL_COM1_BASE, 3);
-  serial_configure_line(SERIAL_COM1_BASE);
-
   unsigned int i = 0;
   while (buf[i] != '\0') {
     while (!serial_is_transmit_fifo_empty(SERIAL_COM1_BASE)) {
@@ -64,4 +73,18 @@ int serial_write_str(char *buf) {
   }
 
   return i;
+}
+
+void serial_write_hex(unsigned int value) {
+  char hex[] = "0123456789ABCDEF";
+
+  serial_write_str("0x");
+
+  for (int i = 28; i >= 0; i -= 4) {
+    unsigned int digit = (value >> i) & 0xF;
+    char c[2];
+    c[0] = hex[digit];
+    c[1] = '\0';
+    serial_write_str(c);
+  }
 }
