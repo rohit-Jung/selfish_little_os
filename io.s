@@ -1,4 +1,9 @@
+; C has no way to emit in/out. 
+; Those instructions talk to the I/O address space — a second, separate 64K address space that only two instructions can reach. 
+; No C expression compiles to them. so we write in asm and call in C
+
 global outb  ; make the label outb visible to the outside file
+
 
 ; outb:  send a byte to an IO port
 ; stack: [esp + 8] the data byte
