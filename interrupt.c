@@ -55,7 +55,8 @@ void install_idt(){
   interrupts_init_descriptor(INTERRUPTS_PAGING, (unsigned int) interrupt_handler_14);
 
   idt.address  = (unsigned int) &idt_descriptors;
-  idt.size = sizeof(struct IDTDescriptor) * INTERRUPTS_DESCRIPTOR_COUNT;
+  /* the limit field is the size in bytes minus one */
+  idt.size = (sizeof(struct IDTDescriptor) * INTERRUPTS_DESCRIPTOR_COUNT) - 1;
   load_idt((unsigned int) &idt);
 
   pic_remap(PIC_1_OFFSET, PIC_2_OFFSET);
@@ -82,11 +83,10 @@ void interrupt_handler(struct cpu_state *cpu, struct stack_state *stack, unsigne
 
     if (scan_code <= KBD_MAX_ASCII) {
       ascii = kbd_scan_code_to_ascii(scan_code);
-      serial_configure_baud_rate(SERIAL_COM1_BASE, 4);
-      serial_configure_line(SERIAL_COM1_BASE);
 
-      char str[1];
+      char str[2];
       str[0] = ascii;
+      str[1] = '\0';
       serial_write_str(str);
     }
 
