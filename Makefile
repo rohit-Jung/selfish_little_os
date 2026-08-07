@@ -3,7 +3,8 @@ OBJECTS = loader.o kmain.o framebuffer.o io.o serial.o \
 					gdt.o memory_segments.o
 CC = gcc 
 CFLAGS = -m32 -nostdlib -nostdinc -fno-builtin -fno-stack-protector \
-				 -nostartfiles -nodefaultlibs -Wall -Wextra -Werror -c
+				 -nostartfiles -nodefaultlibs -fno-pic -mgeneral-regs-only \
+				 -Wall -Wextra -Werror -c
 LDFLAGS = -T link.ld -melf_i386
 AS = nasm
 ASFLAGS = -f elf
