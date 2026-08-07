@@ -18,7 +18,9 @@ unsigned char read_scan_code()
  */
 unsigned char kbd_scan_code_to_ascii(unsigned char scan_code)
 {
-	unsigned char ascii[256] =
+	/* static so it lives in .rodata; a stack-local initializer makes gcc
+	 * emit a 256-byte inline copy (SSE, or a memcpy we do not have) */
+	static const unsigned char ascii[256] =
 		{
 			0x0, 0x0, '1', '2', '3', '4', '5', '6',		// 0 - 7
 			'7', '8', '9', '0', '-', '=', 0x0, 0x0,		// 8 - 15
