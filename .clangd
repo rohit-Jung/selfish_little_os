@@ -1,0 +1,7 @@
+CompileFlags:
+  Add:
+    - -m32
+    - -std=c11
+    - -ffreestanding
+    - -nostdinc
+    - -I/home/rokshh/Documents/coding/projects/low-level/little-os/include
