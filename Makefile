@@ -12,6 +12,9 @@ ISO       := selfish_os.iso
 C_SRCS := $(shell find $(SRC_DIR) -name '*.c')
 S_SRCS := $(shell find $(SRC_DIR) -name '*.s')
 
+MODULE_SRCS := $(wildcard modules/*.s)
+MODULE_BINS := $(MODULE_SRCS:modules/%.s=$(BUILD_DIR)/modules/%)
+
 # The source extension is kept in the object name: gdt.c -> gdt.c.o and
 # gdt.s -> gdt.s.o. Without it both would claim build/arch/x86/gdt.o, the
 # .c rule would win, and the assembly would silently never be assembled.
@@ -35,7 +38,7 @@ LDFLAGS := -T link.ld -melf_i386
 
 .PHONY: all iso run debug clean
 
-all: $(KERNEL) 
+all: $(KERNEL)
 
 $(KERNEL): $(OBJS) link.ld
 	$(LD) $(LDFLAGS) $(OBJS) -o $@
@@ -48,11 +51,17 @@ $(BUILD_DIR)/%.s.o: $(SRC_DIR)/%.s
 	@mkdir -p $(dir $@)
 	$(AS) $(ASFLAGS) $< -o $@
 
+$(BUILD_DIR)/modules/%: modules/%.s
+		@mkdir -p $(dir $@)
+		$(AS) -f bin $< -o $@
+
 iso: $(ISO)
 
-$(ISO): $(KERNEL) $(ISO_DIR)/boot/grub/grub.cfg
-	cp $(KERNEL) $(ISO_DIR)/boot/kernel.elf
-	grub-mkrescue -o $@ $(ISO_DIR)
+$(ISO): $(KERNEL) $(MODULE_BINS) $(ISO_DIR)/boot/grub/grub.cfg
+		@mkdir -p $(ISO_DIR)/modules
+		cp $(KERNEL) $(ISO_DIR)/boot/kernel.elf
+		cp $(MODULE_BINS) $(ISO_DIR)/modules/
+		grub-mkrescue -o $@ $(ISO_DIR)
 
 run: $(ISO)
 	qemu-system-i386 -enable-kvm -boot d -cdrom $(ISO) -m 4 -serial stdio
