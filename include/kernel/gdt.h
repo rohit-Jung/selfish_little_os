@@ -6,7 +6,7 @@
 /* Null descriptor, kernel code, kernel data */
 #define GDT_ENTRY_COUNT 3
 
-#define GDT_BASE  0
+#define GDT_BASE 0
 #define GDT_LIMIT 0xFFFFF
 
 /* access_byte values
@@ -35,10 +35,10 @@ struct gdt_ptr {
 struct gdt_entry {
   u16 limit_low;
   u16 base_low;
-  u8  base_middle;
-  u8  access_byte;
-  u8  limit_and_flags;
-  u8  base_high;
+  u8 base_middle;
+  u8 access_byte;
+  u8 limit_and_flags;
+  u8 base_high;
 } __attribute__((packed));
 
 void gdt_set_entry(int index, u32 base_address, u32 limit, u8 access_byte,
