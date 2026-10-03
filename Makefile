@@ -71,6 +71,12 @@ debug: $(ISO)
 	qemu-system-i386 -boot d -cdrom $(ISO) -m 4 -display none \
         -serial stdio -no-reboot -d int,cpu_reset -D $(BUILD_DIR)/qemu.log
 
+format:
+	@find src include -type f \( -name '*.c' -o -name '*.h' \) | while read -r file; do \
+		echo "Formatting: $$file"; \
+		clang-format -i "$$file"; \
+	done
+
 clean:
 	rm -rf $(BUILD_DIR) $(ISO) $(ISO_DIR)/boot/kernel.elf
 
