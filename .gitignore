@@ -1,2 +1,13 @@
-*.iso
+# build output
 build/
+*.o
+*.elf
+*.iso
+*.img
+*.bin
+
+# stale iso staging
+iso/boot/kernel.elf
+iso/modules/
+
+docs/
