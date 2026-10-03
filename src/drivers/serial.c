@@ -24,8 +24,8 @@ void serial_init(void) {
 void serial_configure_baud_rate(u16 com, u16 divisor) {
   outb(SERIAL_LINE_COMMAND_PORT(com), SERIAL_LINE_ENABLE_DLAB);
 
-  outb(SERIAL_DATA_PORT(com), divisor & 0xFF);            /* DLL */
-  outb(SERIAL_INTERRUPT_ENABLE_PORT(com), divisor >> 8);  /* DLM */
+  outb(SERIAL_DATA_PORT(com), divisor & 0xFF);           /* DLL */
+  outb(SERIAL_INTERRUPT_ENABLE_PORT(com), divisor >> 8); /* DLM */
 }
 
 /* serial_configure_line
