@@ -1,6 +1,7 @@
 #include <kernel/idt.h>
 #include <kernel/isr.h>
 #include <kernel/pic.h>
+#include <kernel/serial.h>
 
 static struct idt_ptr idt;
 static struct idt_gate idt_gates[IDT_ENTRY_COUNT];
@@ -34,8 +35,9 @@ void idt_set_gate(int index, u32 address) {
  * fault. Filling the remaining 254 is still outstanding.
  */
 void idt_install(void) {
-  idt_set_gate(INTERRUPTS_KEYBOARD, (u32)interrupt_handler_33);
-  idt_set_gate(INTERRUPTS_PAGING, (u32)interrupt_handler_14);
+  for (int i = 0; i < IDT_ENTRY_COUNT; i++) {
+    idt_set_gate(i, interrupt_handler_table[i]);
+  }
 
   idt.address = (u32)&idt_gates;
   /* the limit field is the size in bytes minus one */
@@ -43,4 +45,74 @@ void idt_install(void) {
   idt_load((u32)&idt);
 
   pic_remap(PIC_1_OFFSET, PIC_2_OFFSET);
+}
+
+/* returns exception name for different u32 according to x86 */
+const char *exception_name(u32 v) {
+  switch (v) {
+  case 0:
+    return "#DE Divide error";
+  case 1:
+    return "#DB Debug error";
+  case 2:
+    return "NM";
+  case 3:
+    return "#BP Breakpoint Error";
+  case 4:
+    return "#OF Overflow Error";
+  case 5:
+    return "#BR Bound Range";
+  case 6:
+    return "#UD invalid opcode";
+  case 7:
+    return "#NM device not available";
+  case 8:
+    return "#DF double fault";
+  case 10:
+    return "#TS invalid TSS";
+  case 11:
+    return "#NP segment not present";
+  case 12:
+    return "#SS stack fault";
+  case 13:
+    return "#GP general protection";
+  case 14:
+    return "#PF Page Fault";
+  case 16:
+    return "#MF x87 fd";
+  case 17:
+    return "#AC alignement check";
+  case 18:
+    return "#MC machine check";
+  case 19:
+    return "#XM simd fd";
+  default:
+    return "reserved /unknown";
+  }
+}
+
+void panic(struct cpu_state *cpu, struct stack_state *stack, u32 v) {
+  serial_write_str("\n **EXCEPTION**\n");
+  serial_write_hex(v);
+  serial_write_str("  ");
+  serial_write_str((char *)exception_name(v));
+  serial_write_str("\n err=");
+  serial_write_hex(stack->error_code);
+  serial_write_str("\n eip=");
+  serial_write_hex(stack->eip);
+  serial_write_str("\n cs=");
+  serial_write_hex(stack->cs);
+  serial_write_str("\n flags=");
+  serial_write_hex(stack->eflags);
+  serial_write_str("\n eax=");
+  serial_write_hex(cpu->eax);
+  serial_write_str("\n ebx=");
+  serial_write_hex(cpu->ebx);
+  serial_write_str("\n esp=");
+  serial_write_hex(cpu->esp);
+  serial_write_str("\n ***halted \n");
+
+  for (;;) {
+    __asm__ __volatile__("cli; hlt");
+  } // right way to stop instead of bare while
 }

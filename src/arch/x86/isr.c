@@ -1,5 +1,5 @@
-#include <kernel/isr.h>
 #include <kernel/idt.h>
+#include <kernel/isr.h>
 #include <kernel/keyboard.h>
 #include <kernel/pic.h>
 #include <kernel/serial.h>
@@ -20,6 +20,10 @@ void isr_dispatch(struct cpu_state *cpu, struct stack_state *stack,
 
   u8 scan_code;
   u8 ascii;
+  if (interrupt < 32) {
+    panic(cpu, stack, interrupt);
+    return;
+  }
 
   switch (interrupt) {
   case INTERRUPTS_KEYBOARD:
@@ -44,6 +48,11 @@ void isr_dispatch(struct cpu_state *cpu, struct stack_state *stack,
     break;
 
   default:
+    if (interrupt >= PIC_1_START_INTERRUPT &&
+        interrupt <= PIC_2_END_INTERRUPT) {
+      /* unhandled but real IRQ — still ack it */
+      pic_acknowledge(interrupt);
+    }
     break;
   }
 }
