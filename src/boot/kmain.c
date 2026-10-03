@@ -5,19 +5,21 @@
 #include <kernel/serial.h>
 
 int kmain(/* additional args */ unsigned int ebx) {
+  (void)ebx; /* multiboot info pointer; unused while the module block is off */
+
   char message[] = "Sleep rokshh";
 
-  multiboot_info_t *mbinfo = (multiboot_info_t *)ebx;
-
-  // GRUB telling mods_count/mods_addr are actually populated
-  if ((mbinfo->flags & MULTIBOOT_INFO_MODS) && mbinfo->mods_count > 0) {
-    multiboot_module_t *mod = (multiboot_module_t *)mbinfo->mods_addr;
-
-    typedef void (*call_module_t)(void);
-    call_module_t start_program = (call_module_t)mod->mod_start;
-    start_program();
-    /* we’ll never get here, unless the module code returns */
-  }
+  // multiboot_info_t *mbinfo = (multiboot_info_t *)ebx;
+  //
+  // // GRUB telling mods_count/mods_addr are actually populated
+  // if ((mbinfo->flags & MULTIBOOT_INFO_MODS) && mbinfo->mods_count > 0) {
+  //   multiboot_module_t *mod = (multiboot_module_t *)mbinfo->mods_addr;
+  //
+  //   typedef void (*call_module_t)(void);
+  //   call_module_t start_program = (call_module_t)mod->mod_start;
+  //   start_program();
+  //   /* we’ll never get here, unless the module code returns */
+  // }
 
   /* the gdt goes first: the idt's gate descriptors name a code segment
    * selector, which has to resolve against a gdt we control. */
@@ -31,6 +33,7 @@ int kmain(/* additional args */ unsigned int ebx) {
 
   idt_install();
   __asm__ __volatile__("sti"); /* enable interrupts */
+  __asm__ __volatile__("ud2"); /* guaranteed #UD, vector 6 */
 
   while (1) {
   }; /* hang so keyboard interrupt can fire */
